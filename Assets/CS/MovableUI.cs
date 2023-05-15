@@ -5,11 +5,11 @@ using UnityEngine.EventSystems;
 public class MovableUI : MonoBehaviour, IPointerDownHandler, IDragHandler
 {
     [SerializeField]
-    private Transform _targetTr; // 이동될 UI
+    Transform _targetTr; // 이동될 UI
 
-    private Vector2 _startingPoint;
-    private Vector2 _moveBegin;
-    private Vector2 _moveOffset;
+    Vector2 _startingPoint;
+    Vector2 _moveBegin;
+    Vector2 _moveOffset;
 
     private void Awake()
     {
@@ -18,9 +18,12 @@ public class MovableUI : MonoBehaviour, IPointerDownHandler, IDragHandler
             _targetTr = transform.parent;
     }
 
-    // 드래그 시작 위치 지정
+    // 드래그 :  시작 위치 지정
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
     {
+        // 최한단으로 내림 ( 화면에서 해당 오브젝트를 최상단으로... )
+        transform.SetAsLastSibling();
+
         _startingPoint = _targetTr.position;
         _moveBegin = eventData.position;
     }
@@ -30,11 +33,12 @@ public class MovableUI : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         _moveOffset = eventData.position - _moveBegin;
 
-        if (_startingPoint.x + _moveOffset.x > (Screen.width / 2) + 1050) return;
-        if (_startingPoint.x + _moveOffset.x < (Screen.width / 2) - 1050) return;
+        int nx = 1050, ny = 700;
+        if (_startingPoint.x + _moveOffset.x > (Screen.width / 2) + nx) return;
+        if (_startingPoint.x + _moveOffset.x < (Screen.width / 2) - nx) return;
 
-        if (_startingPoint.y + _moveOffset.y > (Screen.height / 2) + 700) return;
-        if (_startingPoint.y + _moveOffset.y < (Screen.height / 2) - 700) return;
+        if (_startingPoint.y + _moveOffset.y > (Screen.height / 2) + ny) return;
+        if (_startingPoint.y + _moveOffset.y < (Screen.height / 2) - ny) return;
 
         // 이동
         _targetTr.position = _startingPoint + _moveOffset;
