@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - WORD
   layers:
   - Default
   - TransparentFX
@@ -40,4 +41,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: BG
+    uniqueID: 1830922189
+    locked: 0
+  - name: WORD
+    uniqueID: 4001735371
+    locked: 0
+  - name: UI
+    uniqueID: 2726622475
     locked: 0
