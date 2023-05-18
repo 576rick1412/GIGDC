@@ -32,6 +32,9 @@ public class GameControl : MonoBehaviour
 
         if(Input.GetMouseButtonUp(0))
         {
+            if(dragObject != null) 
+                dragObject.GetComponent<Word>().isDrag = false;
+
             isDrag = false;
             dragObject = null;
         }
@@ -42,18 +45,20 @@ public class GameControl : MonoBehaviour
         // 드래그
         if (isDrag)
         {
+            ref bool isRight = ref dragObject.GetComponent<Word>().isRight;
+            float tableEndPosY = dragObject.GetComponent<Word>().tableEndPosY;
+
             Vector2 nowCamPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             moveOffset = nowCamPos - saveCamPos;
 
-            // 이동
-            dragObject.position = startingPos + moveOffset;
+            Move();
 
             // 드래그에 따른 이미지 크기 변환, 작아짐 / 커짐
             if (dragObject.position.x < midLinePosX)
             {
                 if (nowCamPos.x < midLinePosX)
                 {
-                    dragObject.GetComponent<Word>().isRight = false;
+                    isRight = false;
 
                     if (startingPos.x > midLinePosX)
                     {
@@ -64,8 +69,27 @@ public class GameControl : MonoBehaviour
             }
 
             if (nowCamPos.x > midLinePosX)
-                dragObject.GetComponent<Word>().isRight = true;
+                isRight = true;
         }
+    }
+
+    void Move()
+    {
+        // 이동
+        dragObject.position = startingPos + moveOffset;
+
+        // 화면 밖 예외처리
+        float endlineX = 8.8f, endlineY = 5f;
+        var POS = dragObject.position;
+
+        Vector3 AutoSet = new Vector3(POS.x, POS.y, POS.z);
+
+        if (dragObject.position.x > endlineX     ) AutoSet.x = endlineX;
+        if (dragObject.position.x < endlineX * -1) AutoSet.x = endlineX * -1;
+        if (dragObject.position.y > endlineY     ) AutoSet.y = endlineY;
+        if (dragObject.position.y < endlineY * -1) AutoSet.y = endlineY * -1;
+
+        dragObject.position = AutoSet;
     }
 
     void Cast()
@@ -84,8 +108,14 @@ public class GameControl : MonoBehaviour
                     dragObject = hit.collider.gameObject.transform.parent;
 
                     sorting++;
+
+                    dragObject.transform.GetChild(0).gameObject.
+                        GetComponent<SpriteRenderer>().sortingOrder = sorting;
+
                     dragObject.transform.GetChild(1).gameObject.
                         transform.GetChild(0).GetComponent<Canvas>().sortingOrder = sorting;
+
+                    dragObject.GetComponent<Word>().isDrag = true;
 
                     saveCamPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                     startingPos = dragObject.position;
