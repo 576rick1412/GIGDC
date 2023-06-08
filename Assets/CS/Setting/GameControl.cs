@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameControl : MonoBehaviour
 {
@@ -13,9 +14,14 @@ public class GameControl : MonoBehaviour
     Vector2 startingPos;
     Vector2 saveCamPos; 
     Vector2 moveOffset;
+
+    [SerializeField] Button yes_Button;
+    [SerializeField] Button no_Button;
+
     void Awake()
     {
-        
+        yes_Button.onClick.AddListener(() => Yes_Button());
+        no_Button .onClick.AddListener(() =>  No_Button());
     }
 
     void Start()
@@ -46,7 +52,6 @@ public class GameControl : MonoBehaviour
         if (isDrag)
         {
             ref bool isRight = ref dragObject.GetComponent<Word>().isRight;
-            float tableEndPosY = dragObject.GetComponent<Word>().tableEndPosY;
 
             Vector2 nowCamPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             moveOffset = nowCamPos - saveCamPos;
@@ -98,7 +103,7 @@ public class GameControl : MonoBehaviour
         {
             var Ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Debug.DrawRay(Ray.origin, Ray.direction * 10, Color.red, 0.2f);
-            RaycastHit2D hit = Physics2D.Raycast(Ray.origin, Ray.direction, 1000);
+            RaycastHit2D hit = Physics2D.Raycast(Ray.origin, Ray.direction, 1000,LayerMask.GetMask("Cast_Skip"));
 
             if (hit)
             {
@@ -107,20 +112,39 @@ public class GameControl : MonoBehaviour
                     isDrag = true;
                     dragObject = hit.collider.gameObject.transform.parent;
 
-                    sorting++;
-
-                    dragObject.transform.GetChild(0).gameObject.
-                        GetComponent<SpriteRenderer>().sortingOrder = sorting;
-
-                    dragObject.transform.GetChild(1).gameObject.
-                        transform.GetChild(0).GetComponent<Canvas>().sortingOrder = sorting;
-
-                    dragObject.GetComponent<Word>().isDrag = true;
-
-                    saveCamPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    startingPos = dragObject.position;
-                }
+                    Cast_Word(hit.collider.gameObject.transform.parent);
             }
         }
     }       // 레이캐스트
+
+    void Cast_Word(Transform hitObject)
+    {
+            isDrag = true;
+            dragObject = hitObject;
+
+            sorting++;
+
+            dragObject.transform.GetChild(0).gameObject.
+                GetComponent<SpriteRenderer>().sortingOrder = sorting;
+
+            dragObject.transform.GetChild(1).gameObject.
+                transform.GetChild(0).GetComponent<Canvas>().sortingOrder = sorting;
+
+            dragObject.GetComponent<Word>().isDrag = true;
+
+            saveCamPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            startingPos = dragObject.position;
+        }
+    }
+
+    public void Yes_Button()
+    {
+        Debug.Log("승인");
+    }
+
+    public void No_Button()
+    {
+        // 페이퍼플리즈는 승인도장을 아무리 찍어도 거부 도장 하나만 있다면 거부로 판단됨
+        Debug.Log("거부");
+    }
 }
